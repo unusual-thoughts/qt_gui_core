@@ -29,7 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from python_qt_binding.QtGui import QColor, QFont
-from python_qt_binding.QtWidgets import QGraphicsItemGroup
+from python_qt_binding.QtWidgets import QGraphicsItemGroup, QGraphicsSimpleTextItem
 
 
 class GraphItem(QGraphicsItemGroup):
@@ -41,8 +41,27 @@ class GraphItem(QGraphicsItemGroup):
     _COLOR_RED = QColor(255, 0, 0)
     _COLOR_TEAL = QColor(0, 170, 170)
 
-    _LABEL_FONT = QFont('sans', pointSize=8, weight=QFont.Light)
+    _FONT_SIZE = 12.0
+    _FONT_SIZE_IS_ADJUSTED = False
+    _FONT_SIZE_REFERENCE_TEXT = ''.join(map(chr, range(0x20, 0x7f)))
+    _FONT_SIZE_REFERENCE_WIDTH = 650
+
+    _LABEL_FONT = QFont('sans', pointSize=_FONT_SIZE, weight=QFont.Light)
 
     def __init__(self, highlight_level, parent=None):
         super(GraphItem, self).__init__(parent)
         self._highlight_level = highlight_level
+        if not GraphItem._FONT_SIZE_IS_ADJUSTED:
+            GraphItem._adjust_font_size()
+
+    @staticmethod
+    def _adjust_font_size():
+        GraphItem._FONT_SIZE_IS_ADJUSTED = True
+
+        text_item = QGraphicsSimpleTextItem(GraphItem._FONT_SIZE_REFERENCE_TEXT)
+        text_item.setFont(GraphItem._LABEL_FONT)
+        # reduce font size on high resolution displays until text_item in smaller than reference width
+        while text_item.sceneBoundingRect().width() > GraphItem._FONT_SIZE_REFERENCE_WIDTH:
+            GraphItem._FONT_SIZE *= 0.95
+            GraphItem._LABEL_FONT.setPointSizeF(GraphItem._FONT_SIZE)
+            text_item.setFont(GraphItem._LABEL_FONT)
