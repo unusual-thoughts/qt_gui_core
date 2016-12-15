@@ -189,7 +189,9 @@ class DotToQtGenerator():
         if label is not None:
             label = label.decode('string_escape')
 
-        penwidth = int(edge.attr.get('penwidth', 1))
+        penwidth = 1
+        if 'penwidth' in edge.attr:
+            penwidth = int(edge.attr['penwidth'])
 
         color = None
         if 'colorR' in edge.attr and 'colorG' in edge.attr and 'colorB' in edge.attr:
@@ -232,6 +234,8 @@ class DotToQtGenerator():
         if dotcode is None:
             return {}, {}
         graph = pydot.graph_from_dot_data(dotcode.encode("ascii", "ignore"))
+        if isinstance(graph, list):
+            graph = graph[0]
 
         #graph = pygraphviz.AGraph(string=self._current_dotcode, strict=False, directed=True)
         #graph.layout(prog='dot')
